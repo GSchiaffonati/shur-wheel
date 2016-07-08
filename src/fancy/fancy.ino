@@ -58,12 +58,16 @@ void setup(){
 }
 
 void loop(){
+  int ledState = 0;
   Serial.println("main start");
   //FastLED.show();
   //FastLED.delay(1000 / FRAMES_PER_SECOND);
   alphaDis();
   segR();
-  
+  ledState = digitalRead(Button1);
+  if(ledState == HIGH){
+    led();
+  }
 }
 
 void alphaDis(){
