@@ -49,6 +49,8 @@ void setup(){
 
 void loop(){
   Serial.println("main start");
+  FastLED.show();
+  FastLED.delay(1000 / FRAMES_PER_SECOND);
   alphaDis();
   segR();
   
