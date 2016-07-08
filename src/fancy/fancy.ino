@@ -48,7 +48,10 @@ void setup(){
 
   int i;
   for(i=0;i<NUM_LEDS;i++){
-    leds[i] = CRGB(0,0,0);//set to off
+    leds[i].red = 0;//set to off
+    leds[i].green = 0;
+    leds[i].blue = 0;
+    FastLED.show();
     }
   
   
@@ -85,12 +88,18 @@ void led(){
   int i = 0;
   for(i;i<4;i++){
     leds[i].green = 20;
-  }
+    FastLED.show();
+    delay(250);
+    }
   for(i;i<8;i++){
     leds[i].red = 20;
+    FastLED.show();
+    delay(250);
   }
   for(i;i<12;i++){
     leds[i].blue = 20;
+    FastLED.show();
+    delay(250);
   }
 }
 
