@@ -1,0 +1,9 @@
+[submodule "lib/FastLED"]
+	path = lib/FastLED
+	url = https://github.com/FastLED/FastLED.git
+[submodule "lib/Adafruit-GFX-Library"]
+	path = lib/Adafruit-GFX-Library
+	url = https://github.com/adafruit/Adafruit-GFX-Library.git
+[submodule "lib/Adafruit_LED_Backpack"]
+	path = lib/Adafruit_LED_Backpack
+	url = https://github.com/adafruit/Adafruit_LED_Backpack.git
