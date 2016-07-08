@@ -45,12 +45,19 @@ void setup(){
   pinMode(SegE, OUTPUT);
   pinMode(SegF, OUTPUT);
   pinMode(SegG, OUTPUT);
+
+  int i;
+  for(i=0;i<NUM_LEDS;i++){
+    leds[i] = CRGB(0,0,0);//set to off
+    }
+  
+  
 }
 
 void loop(){
   Serial.println("main start");
-  FastLED.show();
-  FastLED.delay(1000 / FRAMES_PER_SECOND);
+  //FastLED.show();
+  //FastLED.delay(1000 / FRAMES_PER_SECOND);
   alphaDis();
   segR();
   
@@ -72,5 +79,18 @@ void segR(){
   digitalWrite(SegE, LOW);
   digitalWrite(SegF, LOW);
   digitalWrite(SegG, HIGH);
+}
+
+void led(){
+  int i = 0;
+  for(i;i<4;i++){
+    leds[i].green = 20;
+  }
+  for(i;i<8;i++){
+    leds[i].red = 20;
+  }
+  for(i;i<12;i++){
+    leds[i].blue = 20;
+  }
 }
 
