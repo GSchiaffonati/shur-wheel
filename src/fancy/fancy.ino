@@ -7,8 +7,6 @@
 
 FASTLED_USING_NAMESPACE
 
-#define DATA_PIN 11
-#define CLK_PIN 13
 #define LED_TYPE APA102
 #define COLOR_ORDER BGR
 #define NUM_LEDS 15
@@ -45,30 +43,75 @@ void setup(){
   pinMode(SegE, OUTPUT);
   pinMode(SegF, OUTPUT);
   pinMode(SegG, OUTPUT);
+
+  int i;
+  for(i=0;i<NUM_LEDS;i++){
+    leds[i].red = 0;//set to off
+    leds[i].green = 0;
+    leds[i].blue = 0;
+    FastLED.show();
+    }
+
+
 }
 
 void loop(){
+  int ledState = 1;
   Serial.println("main start");
+  //FastLED.show();
+  //FastLED.delay(1000 / FRAMES_PER_SECOND);
   alphaDis();
   segR();
-  
+  ledState = digitalRead(Button1);
+  if(ledState == LOW){
+    Serial.println("button press");
+    led();
+  }
+  else{
+    Serial.println("no press");
+  }
 }
 
 void alphaDis(){
-  alpha4.writeDigitAscii(0, 'S');
-  alpha4.writeDigitAscii(1, 'H');
-  alpha4.writeDigitAscii(2, 'U');
-  alpha4.writeDigitAscii(3, ' ');
+  alpha4.writeDigitAscii(0, ' ');
+  alpha4.writeDigitAscii(1, 'S');
+  alpha4.writeDigitAscii(2, 'H');
+  alpha4.writeDigitAscii(3, 'U');
   alpha4.writeDisplay();
 }
 
 void segR(){
-  digitalWrite(SegA, HIGH);
-  digitalWrite(SegB, LOW);
-  digitalWrite(SegC, LOW);
-  digitalWrite(SegD, LOW);
-  digitalWrite(SegE, HIGH);
-  digitalWrite(SegF, HIGH);
-  digitalWrite(SegG, LOW);
+  digitalWrite(SegA, LOW);
+  digitalWrite(SegB, HIGH);
+  digitalWrite(SegC, HIGH);
+  digitalWrite(SegD, HIGH);
+  digitalWrite(SegE, LOW);
+  digitalWrite(SegF, LOW);
+  digitalWrite(SegG, HIGH);
 }
 
+void led(){
+  int i = 0;
+  Serial.println("led function called");
+  for(i;i<4;i++){
+    leds[i] = CRGB::Green;
+    FastLED.show();
+    delay(50);
+    }
+  for(i;i<8;i++){
+    leds[i] = CRGB::Red;
+    FastLED.show();
+    delay(50);
+  }
+  for(i;i<12;i++){
+    leds[i] = CRGB::Blue;
+    FastLED.show();
+    delay(50);
+  }
+    for(i=0;i<NUM_LEDS;i++){
+    leds[i].red = 0;//set to off
+    leds[i].green = 0;
+    leds[i].blue = 0;
+    FastLED.show();
+    }
+}
