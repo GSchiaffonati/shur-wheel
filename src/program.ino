@@ -61,13 +61,79 @@ void setup(){
 
 void loop(){
 	int rpm = 0;//CHANGE THIS!
+	int gear = 0;
 	displayRPM(rpm);
 	shiftLights(rpm);
-	gearSeg(rpm);
+	gearSeg(gear);
 }
 
-void gearSeg(int rpm){
-
+void gearSeg(int gear){
+	switch (gear){
+		case 0:
+			digitalWrite(SegA, HIGH);
+			digitalWrite(SegB, HIGH);
+			digitalWrite(SegC, LOW);
+  			digitalWrite(SegD, HIGH);
+			digitalWrite(SegE, LOW);
+			digitalWrite(SegF, HIGH);
+			digitalWrite(SegG, LOW);
+		case 1:
+			digitalWrite(SegA, HIGH);
+  			digitalWrite(SegB, LOW);
+  			digitalWrite(SegC, LOW);
+  			digitalWrite(SegD, HIGH);
+			digitalWrite(SegE, HIGH);
+  			digitalWrite(SegF, HIGH);
+  			digitalWrite(SegG, HIGH);
+		case 2:
+			digitalWrite(SegA, LOW);
+  			digitalWrite(SegB, LOW);
+  			digitalWrite(SegC, HIGH);
+  			digitalWrite(SegD, LOW);
+			digitalWrite(SegE, LOW);
+  			digitalWrite(SegF, HIGH);
+  			digitalWrite(SegG, LOW);
+		case 3:
+			digitalWrite(SegA, LOW);
+  			digitalWrite(SegB, LOW);
+  			digitalWrite(SegC, LOW);
+  			digitalWrite(SegD, LOW);
+			digitalWrite(SegE, HIGH);
+  			digitalWrite(SegF, HIGH);
+  			digitalWrite(SegG, LOW);
+		case 4:
+			digitalWrite(SegA, HIGH);
+  			digitalWrite(SegB, LOW);
+  			digitalWrite(SegC, LOW);
+  			digitalWrite(SegD, HIGH);
+			digitalWrite(SegE, HIGH);
+  			digitalWrite(SegF, LOW);
+  			digitalWrite(SegG, LOW);
+		case 5:
+			digitalWrite(SegA, HIGH);
+  			digitalWrite(SegB, LOW);
+  			digitalWrite(SegC, LOW);
+  			digitalWrite(SegD, HIGH);
+			digitalWrite(SegE, HIGH);
+  			digitalWrite(SegF, LOW);
+  			digitalWrite(SegG, LOW);
+		case 6:
+			digitalWrite(SegA, HIGH);
+  			digitalWrite(SegB, HIGH);
+  			digitalWrite(SegC, LOW);
+  			digitalWrite(SegD, LOW);
+			digitalWrite(SegE, LOW);
+  			digitalWrite(SegF, LOW);
+  			digitalWrite(SegG, LOW);
+//		default:
+//			digitalWrite(SegA, LOW);
+//			digitalWrite(SegB, HIGH;
+//  			digitalWrite(SegC, HIGH);
+//  			digitalWrite(SegD, LOW);
+//			digitalWrite(SegE, LOW);
+//  			digitalWrite(SegF, LOW);
+//  			digitalWrite(SegG, LOW);
+	}
 }
 
 //Function to take RPM and output to alphanumeric display
