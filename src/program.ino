@@ -2,7 +2,7 @@
 //	For the attention of anyone unfortunate enough to have to
 //	read/alter this program!
 //####################################################################
-//The i2c may be setup only as slave mode, 
+//The i2c may be setup only as slave mode,
 //
 //####################################################################
 
@@ -49,7 +49,11 @@ const int SegG = 5;
 
 //I2C data
 byte DataPacket[packetsize];	//Size 2 BYTE array, note zero index when called
-int RPM = 0;	//Full data converted back from individual packets
+int RPM = 0;	//rpm from the wheel
+//Full data converted back from individual packets
+
+
+int ecuRPM = 0;	//rpm from the engine
 
 
 void setup(){
@@ -84,7 +88,7 @@ void setup(){
 }
 
 void loop(){
-	int gear = 0;	//CHANGE THIS!
+	int gear = calcGear();	//CHANGE THIS!
 	displayRPM(RPM);
 	shiftLights(RPM);
 	gearSeg(gear);
@@ -109,6 +113,45 @@ void displayRPM(int RR) {
   	alpha4.writeDisplay();
 
 	//delay(1);	//removed delay to keep things running fast
+}
+
+//Calculate the gear
+int calcGear(){
+	//gear ratios
+	float g1 = 19.194;
+	float g2 = 14.050;
+	float g3 = 11.000;
+	float g4 = 8.821;
+	float g5 = 7.153;
+	float g6 = 6.029;
+
+	int g = ecuRPM / RPM;	//Data is lost here, I believe it is minimal so can be ignored
+	int gVal;
+	if(g > g6){
+		gVal = 6;
+	}
+	else if(g > g5){
+		gVal = 5;
+	}
+	else if(g > g4){
+		gVal = 4;
+	}
+	else if(g > g3){
+		gVal = 3;
+	}
+	else if(g > g2){
+		gVal = 2;
+	}
+	else if(g > g1){
+		gVal = 1;
+	}
+	else if (g > 100){	//if ratio > 100 assume it is in neutral
+		gVal = 0;
+	}
+	else{
+		gVal = -1;
+	}
+	return gVal;
 }
 
 //Function to take value of Shift and scale to display
@@ -144,20 +187,20 @@ void shiftLights(int RS) {
 
 void receiveEvent(int howMany)
 {
-  while (Wire.available())
-  {
-    for ( int i = 0; i < packetsize; i++)
-    {
-      DataPacket[i] = Wire.read();    //  Recieve byte
-    }
+  	while (Wire.available())
+  	{
+    		for ( int i = 0; i < packetsize; i++)
+    		{
+      			DataPacket[i] = Wire.read();	//Recieve byte
+    		}
 
-    //  Format Data
-    RPM = DataPacket[0];    //  Set first byte as integer in variable Data
-    RPM = (RPM << 8) | DataPacket[1];   //  shift c by 8 BITS to correct transmission formatting and OR it with the second BYTE B
-  }
-  Serial.print("Data Recieved ");    //  Print the result to the serial com port for debug
-  Serial.print(RPM);
-  Serial.print("\n");   //  Add carriage return to each line to allow for easy reading in com port
+		//Format Data
+    		RPM = DataPacket[0];	//Set first byte as integer in variable Data
+    		RPM = (RPM << 8) | DataPacket[1];	//shift c by 8 BITS to correct transmission formatting and OR it with the second BYTE B
+  	}
+	//Serial.print("Data Recieved ");    //  Print the result to the serial com port for debug
+	//Serial.print(RPM);
+  	//Serial.print("\n");   //  Add carriage return to each line to allow for easy reading in com port
 }
 
 void gearSeg(int gear){
@@ -215,6 +258,14 @@ void gearSeg(int gear){
 			digitalWrite(SegA, HIGH);
   			digitalWrite(SegB, HIGH);
   			digitalWrite(SegC, LOW);
+  			digitalWrite(SegD, LOW);
+			digitalWrite(SegE, LOW);
+  			digitalWrite(SegF, LOW);
+  			digitalWrite(SegG, LOW);
+		case -1:	//error case (when calcGear returns -1 error code)
+			digitalWrite(SegA, LOW);
+  			digitalWrite(SegB, HIGH);
+  			digitalWrite(SegC, HIGH);
   			digitalWrite(SegD, LOW);
 			digitalWrite(SegE, LOW);
   			digitalWrite(SegF, LOW);
