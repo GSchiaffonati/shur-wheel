@@ -27,8 +27,9 @@ CRGB leds[NUM_LEDS];
 #define LED_MAIN_DISPLAY 12//number of APA102 LEDs on the display fo the revs
 
 //I2C
-#define WHEEL_I2C_ADDRESS 0x8//address to request data from for the wheel rotation
-#define packetsize 2
+#define WHEEL_I2C_ADDRESS 0x4//address to request data from for the wheel rotation
+#define ECU_I2C_ADDRESS 0x5
+#define PACKETSIZE 2
 #define LOCAL_I2C_ADDRESS 0x9//set the local I2C address (the i2c address of the wheel)
 
 //Alpha-Numeric 16-segment displays
@@ -48,13 +49,13 @@ const int SegF = 6;
 const int SegG = 5;
 
 //I2C data
-byte DataPacket[packetsize];	//Size 2 BYTE array, note zero index when called
+byte DataPacketWheel[PACKETSIZE];	//Size 2 BYTE array, note zero index when called
+byte DataPacketECU[PACKETSIZE];
+
+//initial values of the rpm (assumed to be 0!)
 int RPM = 0;	//rpm from the wheel
 //Full data converted back from individual packets
-
-
 int ecuRPM = 0;	//rpm from the engine
-
 
 void setup(){
 	delay(3000);	//3 second delay for recovery? (Fast LED requirement,.. maybe??)
@@ -83,14 +84,18 @@ void setup(){
     	}
 
 	Wire.begin(LOCAL_I2C_ADDRESS);	//Join I2C bus as slave with address LOCAL_I2C_ADDRESS
-  	Wire.onReceive(receiveEvent);	//Register event for data recieve
+  	//Wire.onReceive(receiveEvent);	//Register event for data recieve in slave mode
 
 }
 
 void loop(){
-	int gear = calcGear();	//CHANGE THIS!
-	displayRPM(RPM);
-	shiftLights(RPM);
+	wheelRPM();	//update rpm from the wheel
+	engineRPM();	//rpm from the engine
+
+	displaySpeed(speed(RPM));
+	displayRPM(ecuRPM);
+	shiftLights(ecuRPM);
+	int gear = calcGear();
 	gearSeg(gear);
 }
 
@@ -113,6 +118,32 @@ void displayRPM(int RR) {
   	alpha4.writeDisplay();
 
 	//delay(1);	//removed delay to keep things running fast
+}
+
+void displaySpeed(float mph){
+	int o = mph;	//convert float to int data lost need way to parse float into decimal with point displayed
+
+  	int d0,d1,d2,d3;
+
+  	d0=o/1000;
+  	d1=o%1000/100;
+  	d2=o%100/10;
+  	d3=o%10;
+
+  	alpha4.writeDigitAscii(0, d0 + '0');
+  	alpha4.writeDigitAscii(1, d1 + '0');
+  	alpha4.writeDigitAscii(2, d2 + '0');
+  	alpha4.writeDigitAscii(3, d3 + '0');
+
+  	alpha4.writeDisplay();
+
+}
+
+float speed(int RPM){
+	float circumference = 1.445;
+	const float convRate = 2.237;	//1 m/s == 2.237 mph
+	float speed = RPM * circumference * convRate;
+	return speed;
 }
 
 //Calculate the gear
@@ -154,6 +185,7 @@ int calcGear(){
 	return gVal;
 }
 
+
 //Function to take value of Shift and scale to display
 void shiftLights(int RS) {
 	int i = 0;
@@ -185,22 +217,42 @@ void shiftLights(int RS) {
   	FastLED.show();//update the SPI bus
 }
 
-void receiveEvent(int howMany)
-{
-  	while (Wire.available())
-  	{
-    		for ( int i = 0; i < packetsize; i++)
-    		{
-      			DataPacket[i] = Wire.read();	//Recieve byte
-    		}
+void wheelRPM(){
+	Wire.requestFrom(WHEEL_I2C_ADDRESS, PACKETSIZE);
 
-		//Format Data
-    		RPM = DataPacket[0];	//Set first byte as integer in variable Data
-    		RPM = (RPM << 8) | DataPacket[1];	//shift c by 8 BITS to correct transmission formatting and OR it with the second BYTE B
+	while (Wire.available())
+	{
+		for ( int i = 0; i < PACKETSIZE; i++)
+		{
+			DataPacketWheel[i] = Wire.read();    //  Recieve byte
+		}
+
+	//Format Data
+	RPM = DataPacketWheel[0];    //  Set first byte as integer in variable Data
+	RPM = (RPM << 8) | DataPacketWheel[1];   //  shift c by 8 BITS to correct transmission formatting and OR it with the second BYTE B
   	}
 	//Serial.print("Data Recieved ");    //  Print the result to the serial com port for debug
 	//Serial.print(RPM);
-  	//Serial.print("\n");   //  Add carriage return to each line to allow for easy reading in com port
+	//Serial.print("\n");   //  Add carriage return to each line to allow for easy reading in com port
+}
+
+void engineRPM(){
+	Wire.requestFrom(ECU_I2C_ADDRESS, PACKETSIZE);
+
+	while (Wire.available())
+	{
+		for ( int i = 0; i < PACKETSIZE; i++)
+		{
+			DataPacketECU[i] = Wire.read();    //  Recieve byte
+		}
+
+	//Format Data
+	ecuRPM = DataPacketECU[0];    //  Set first byte as integer in variable Data
+	ecuRPM = (ecuRPM << 8) | DataPacketECU[1];   //  shift c by 8 BITS to correct transmission formatting and OR it with the second BYTE B
+  	}
+	//Serial.print("Data Recieved ");    //  Print the result to the serial com port for debug
+	//Serial.print(RPM);
+	//Serial.print("\n");   //  Add carriage return to each line to allow for easy reading in com port
 }
 
 void gearSeg(int gear){
